@@ -1,0 +1,4 @@
+nest g resource 를 통해서 모듈별 controller, service를 생성하여 관리할 수 있다.
+기본 app의 경우 end 포인트를 가지지 않도록 활용한다. 
+// 그러면 index 도 module 로 관리하는가?
+   => user 와 admin 부터 나눠야 하기 때문에 기본 app에서 나누지 않는다
