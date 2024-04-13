@@ -68,7 +68,7 @@ export class PostsController {
   //    예를 들어 id=1일 경우 id가 1인 포스트를 가져온다.
 
   @Get(':id')
-  getPost(@Param('id') id: String) {
+  getPost(@Param('id') id: string) {
     const post = posts.find((post) => post.id === +id);
 
     if (!post) {
