@@ -17,7 +17,7 @@ export class PostsController {
   //    모든 posts를 다 가지고온다
   @Get()
   getPosts() {
-    this.postsService.getAllPosts();
+    return this.postsService.getAllPosts();
   }
   // 2) GET /posts/:id
   //    id에 해당하는 postsfmf rkwudhsek
@@ -25,7 +25,7 @@ export class PostsController {
 
   @Get(':id')
   getPost(@Param('id') id: string) {
-    this.postsService.getPostById(+id);
+    return this.postsService.getPostById(+id);
   }
 
   // 3) POST /posts
