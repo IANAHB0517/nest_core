@@ -10,16 +10,16 @@ import { PostsModel } from './entities/posts.entity';
  * commentCount : nmber;
  */
 
-export interface PostModel {
-  id: number;
-  author: string;
-  title: string;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-}
+// export interface PostsModel {
+//   id: number;
+//   author: string;
+//   title: string;
+//   content: string;
+//   likeCount: number;
+//   commentCount: number;
+// }
 
-// const posts: PostModel[] = [
+// const posts: PostsModel[] = [
 //   {
 //     id: 1,
 //     author: 'newjenas_offical',
@@ -50,7 +50,7 @@ export interface PostModel {
 export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
-    private readonly postsRepository: Repository<PostModel>,
+    private readonly postsRepository: Repository<PostsModel>,
   ) {}
 
   async getAllPosts() {
@@ -118,6 +118,9 @@ export class PostsService {
   }
 
   async deletePost(postId: number) {
+    //delete의 사용법
+    // 1) 해당 로우가 있는지 확인한다
+    // 2) delete 메소드의 파라미터는 pk값을 사용한다.
     const post = await this.postsRepository.findOne({ where: { id: postId } });
 
     if (!post) {
