@@ -6,7 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [JwtModule.register({}), UsersModule],
-
+  exports: [AuthService, UsersModule],
   controllers: [AuthController],
   providers: [AuthService],
 })
