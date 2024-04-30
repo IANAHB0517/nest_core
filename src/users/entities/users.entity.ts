@@ -6,6 +6,7 @@ import { IsEmail, IsString, Length } from 'class-validator';
 import { lengthValidationMessage } from 'src/common/validation-message/length-validation.message';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.messge';
+import { Exclude, Expose } from 'class-transformer';
 
 /**
  *
@@ -30,9 +31,30 @@ export class UsersModel extends BaseModel {
   @IsEmail({}, { message: emailValidationMessage })
   email: string;
 
+  /**
+   * 존재하지 않는 컬럼을 생성하여 노출 시킬 수 있다
+   */
+  // @Expose()
+  // get nicknameAndEmail() {
+  //   return this.nickname + '/' + this.email;
+  // }
+
   @Column()
   @IsString({ message: stringValidationMessage })
   @Length(3, 8, { message: lengthValidationMessage })
+  /**
+   * Request
+   * frontend -> backend
+   * plain object (JSON) -> class instance (dto)
+   *
+   * Response
+   * backend -> frontend
+   * class instance (dto) - > plain object (JSON)
+   *
+   * toClassOnly -> class instance로 변활될 때만
+   * toPlainOnly -> plain object로 변환될 때만
+   */
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @Column({
