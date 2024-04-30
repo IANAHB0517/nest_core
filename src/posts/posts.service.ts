@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { PostsModel } from './entities/posts.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PaginatePostDto } from './dto/paginate-post.dto';
 
 /** author : string;
  * title : string;
@@ -60,6 +61,43 @@ export class PostsService {
       // author 이라는 값을 통해 가지고오기 때문에 중복된 값을 가져오지 않고 한번 가지고 온 값을 재활용하여 출력해주기 때문에 메모리와 속도를 절약할 수 있다.
       relations: ['author'],
     });
+  }
+
+  // 오름차순으로 정렬하는 pagination만 구현한다
+  async paginatePosts(dto: PaginatePostDto) {
+    const posts = await this.postsRepository.find({
+      where: {
+        id: MoreThan(dto.where__id_more_than ?? 0),
+      },
+      // order__createdAt
+      order: {
+        createdAt: dto.order__createdAt,
+      },
+      take: dto.take,
+    });
+
+    /**
+     * Response
+     *
+     * data : Data[],
+     * cursor : {
+     *  atfer : 마지막 Data의 ID
+     *  },
+     * count: 응답한 데이터의 갯수
+     * next : 다음 요청을 할 때 사용할 URL
+     *
+     */
+
+    return { data: posts };
+  }
+
+  async generatePosts(userId: number) {
+    for (let i = 0; i < 100; i++) {
+      await this.createPost(userId, {
+        title: `임의로 생성된 포스트 제목 ${i}`,
+        content: `임의로 생성된 포스트 컨텐츠 ${i}`,
+      });
+    }
   }
 
   async getPostById(id: number) {
