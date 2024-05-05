@@ -3,6 +3,10 @@ import { IsIn, IsNumber, IsOptional } from 'class-validator';
 export class PaginatePostDto {
   // 이전 마지막 데이터의 ID
   // 이 프로퍼티에 입력된 ID보다 높은 ID 부터 값을 가져오기
+  // Transformer가 String을 Number타입으로 변경해준다.
+  // 굉장히 유용하지만 잘 사용 하지 않는다.
+  // 그 이유는 main.ts에 있는 validation Pipe에 transformOptions을 사용 하므로써  classvalidator 어노테이션으로 타입이 지정된 경우 자동으로 쿼리스트링의 타입을 변환 해주기 때문이다.
+  //   @Type(() => Number)
   @IsNumber()
   @IsOptional()
   where__id_more_than?: number;
