@@ -7,7 +7,7 @@ export class BasePaginationDto {
 
   @IsNumber()
   @IsOptional()
-  where__id_less_than?: number;
+  where__id__less_than?: number;
 
   // 이전 마지막 데이터의 ID
   // 이 프로퍼티에 입력된 ID보다 높은 ID 부터 값을 가져오기
@@ -17,7 +17,7 @@ export class BasePaginationDto {
   //   @Type(() => Number)
   @IsNumber()
   @IsOptional()
-  where__id_more_than?: number;
+  where__id__more_than?: number;
 
   // 미리 정의해둔 값일 경우에만 validation이 통과되도록한다 이 예제에서는 ASC만 사용
   //   @IsIn(['ASC', 'DESC'])
