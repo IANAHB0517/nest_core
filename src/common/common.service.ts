@@ -122,7 +122,9 @@ export class CommonService {
              * where는 버려도 되고 두번째 값을 필터할 키값이 되고
              * 세번쨰 값은 typeORM 유틸리티가 된다.
              * 
-             * FILTER_MAPPER에 미리 정의해둔 값
+             * FILTER_MAPPER에 미리 정의해둔 값들로
+             * field 값에 FILTER_MAPPER에서 해당되는 유틸리티를 가져온 후
+             * 값에 적용 해준다.
              */
  
         } else if (split.length === 2){
@@ -145,7 +147,7 @@ export class CommonService {
     FindManyOptions<T>{
 
 
-        
+
     };
 
 }
