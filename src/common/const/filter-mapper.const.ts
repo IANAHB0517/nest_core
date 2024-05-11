@@ -16,4 +16,6 @@ import {
   Not,
 } from 'typeorm';
 
-export const FILTER_MAPPER = {};
+export const FILTER_MAPPER = {
+  not: Not,
+};
