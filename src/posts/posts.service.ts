@@ -68,7 +68,17 @@ export class PostsService {
 
   // 오름차순으로 정렬하는 pagination만 구현한다
   async paginatePosts(dto: PaginatePostDto) {
-    return this.commonService.paginate(dto, this.postsRepository, {}, 'posts');
+    return this.commonService.paginate(
+      dto,
+      this.postsRepository,
+      {
+        /**
+         * join 되어 가지고 와야 하는 값이나 필터링 되어야 하는 값을 넣어준다
+         *  */
+        relations: ['author'],
+      },
+      'posts',
+    );
     // if (dto.page) {
     //   return this.pagePaginatePosts(dto);
     // } else {
