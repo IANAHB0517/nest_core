@@ -44,6 +44,8 @@ export class CommonService {
      */
     const findOptions = this.composeFindOptions<T>(dto);
 
+    console.log(findOptions);
+
     const results = await repository.find({
       ...findOptions,
       ...overrideFindOptions,
@@ -146,14 +148,13 @@ export class CommonService {
           ...this.parseWhereFilter(key, value),
         };
       }
-
-      return {
-        where,
-        order,
-        take: dto.take,
-        skip: dto.page ? dto.take * (dto.page - 1) : null,
-      };
     }
+    return {
+      where,
+      order,
+      take: dto.take,
+      skip: dto.page ? dto.take * (dto.page - 1) : null,
+    };
   }
   private parseWhereFilter<T extends BaseModel>(
     key: string,
