@@ -13,6 +13,8 @@ async function bootstrap() {
         // 쿼리스트링으로 들어옵 값을 클래스 트렌스포머를 통해 어노테이션에 지정되어 있는 대로 임의로 변환 하는 것을 허용 하는 옵션
         enableImplicitConversion: true,
       },
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
 

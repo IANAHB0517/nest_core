@@ -28,11 +28,11 @@ import {
 
 export const FILTER_MAPPER = {
   not: Not,
-  lees_than: LessThan,
+  less_than: LessThan,
   less_than_or_equal: LessThanOrEqual,
   more_than: MoreThan,
   more_than_or_equal: MoreThanOrEqual,
-  i_liek: ILike,
+  i_like: ILike,
   like: Like,
   is_null: IsNull,
   in: In,
