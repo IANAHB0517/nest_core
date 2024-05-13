@@ -128,6 +128,7 @@ export class PostsService {
       },
       take: dto.take,
     });
+
     // 해당되는 포스트가 0개 이상이면
     // 마지막 포스트를 가져오고
     // 아니면 null을 반환한다.
