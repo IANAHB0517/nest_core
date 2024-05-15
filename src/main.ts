@@ -13,6 +13,7 @@ async function bootstrap() {
         // 쿼리스트링으로 들어옵 값을 클래스 트렌스포머를 통해 어노테이션에 지정되어 있는 대로 임의로 변환 하는 것을 허용 하는 옵션
         enableImplicitConversion: true,
       },
+      // 쿼리를 통해 들어오는 key 값을 dto로 설정해놓은 값만 허용하도록 한다.
       whitelist: true,
       forbidNonWhitelisted: true,
     }),
