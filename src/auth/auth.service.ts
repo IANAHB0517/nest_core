@@ -170,7 +170,7 @@ export class AuthService {
     return this.jwtService.sign(payload, {
       secret: secret,
       // seconds
-      expiresIn: isRefreshToken ? 36000 : 300,
+      expiresIn: isRefreshToken ? 3600 : 300,
     });
   }
 
