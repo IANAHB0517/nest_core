@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,10 +18,16 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { ImageModelType } from 'src/common/entity/image.entity';
+import { DataSource } from 'typeorm';
+import { PostsImagesService } from './image/images.service';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly dataSource: DataSource,
+    private readonly postsImagesService: PostsImagesService,
+  ) {}
 
   // 1) Get /posts
   //    모든 posts를 다 가지고온다
@@ -68,18 +75,43 @@ export class PostsController {
     @Body() body: CreatePostDto,
     // @UploadedFile() file?: Express.Multer.File,
   ) {
-    const post = await this.postsService.createPost(userId, body);
+    // 트랜잭션과 관련된 모든 쿼리를 담당할 쿼리러너를 생성한다.
+    const qr = this.dataSource.createQueryRunner();
 
-    for (let i = 0; i < body.images.length; i++) {
-      await this.postsService.createPostImage({
-        post,
-        order: i,
-        path: body.images[i],
-        type: ImageModelType.POST_IMAGE,
-      });
+    // 쿼리 러너에 연결한다
+    await qr.connect();
+
+    // 쿼리 러너에서 트랙잭션을 시작한다.
+    // 이 시점부터 같은 쿼리러너를 사용하면 트랙잭션 안에서 데이터베이스 액션을 실행할 수 있다.
+    await qr.startTransaction();
+
+    // 로직 실행
+    try {
+      const post = await this.postsService.createPost(userId, body, qr);
+
+      for (let i = 0; i < body.images.length; i++) {
+        await this.postsImagesService.createPostImage(
+          {
+            post,
+            order: i,
+            path: body.images[i],
+            type: ImageModelType.POST_IMAGE,
+          },
+          qr,
+        );
+      }
+
+      await qr.commitTransaction();
+      await qr.release();
+
+      return this.postsService.getPostById(post.id);
+    } catch (e) {
+      // 어떤 에러든 에러가 던져지면 트랜잭션을 종료하고 원래 상태로 되돌린다.
+      await qr.rollbackTransaction();
+      await qr.release();
+
+      throw new BadRequestException(`${e.message}라는 에러가 발생했습니다`);
     }
-
-    return this.postsService.getPostById(post.id);
   }
 
   // 4) put /posts/:id

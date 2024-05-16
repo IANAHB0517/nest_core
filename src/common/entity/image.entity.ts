@@ -3,7 +3,7 @@ import { BaseModel } from './base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { Transform } from 'class-transformer';
 import { join } from 'path';
-import { POST_IMAGE_PATH, POST_PUBLIC_IMAGE_PATH } from '../const/path.const';
+import { POST_PUBLIC_IMAGE_PATH } from '../const/path.const';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 
 export enum ImageModelType {
