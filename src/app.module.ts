@@ -17,10 +17,19 @@ import {
   ENV_DB_PORT_KEY,
   ENV_DB_USERNAME_KEY,
 } from './common/const/env-keys.const';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
 
 @Module({
   imports: [
     PostsModule,
+    ServeStaticModule.forRoot({
+      // 2b2d.png
+      // serveRoot를 넣어주면 이렇게 가지고 올 수 있다. http://localhost:3000/public.posts/2b2d.png
+      // rootPath로 PUBLIC_FOLDER_PATH 만 넣어주면 이렇게 가져오면서 다른 endPoint와 주소가 겹치게 된다. http://localhost:3000/posts/2b2d.png
+      rootPath: PUBLIC_FOLDER_PATH,
+      serveRoot: '/public',
+    }),
     ConfigModule.forRoot({
       // 환경번수 파일명
       envFilePath: '.env',
