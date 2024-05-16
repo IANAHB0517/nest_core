@@ -8,9 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -18,7 +16,6 @@ import { User } from 'src/users/decorator/user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostsController {
@@ -45,13 +42,15 @@ export class PostsController {
   @Post()
   @UseGuards(AccessTokenGuard)
   // FileInterceptor를 사용하면 posts.module에서 등록해 놓은 multerModule의 단계를 전부 거친 파일만 받을 수 있다.
-  @UseInterceptors(FileInterceptor('image'))
-  postPosts(
+  // @UseInterceptors(FileInterceptor('image'))
+  async postPosts(
     @User('id') userId: number,
     @Body() body: CreatePostDto,
-    @UploadedFile() file?: Express.Multer.File,
+    // @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.postsService.createPost(userId, body, file?.filename);
+    await this.postsService.createPostImage(body);
+
+    return this.postsService.createPost(userId, body);
   }
 
   // 4) put /posts/:id
