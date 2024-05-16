@@ -7,7 +7,10 @@ import { IsOptional, IsString } from 'class-validator';
 // PickType, OmitType, PartialType
 // 타입이 아닌 값으로 반환을 받기 때문에 extends 받을 수 있다.
 export class CreatePostDto extends PickType(PostsModel, ['title', 'content']) {
-  @IsString()
+  @IsString({
+    // 들어오는 값이 list 로 들어오고 리스트의 요소를 모두 검사한다.
+    each: true,
+  })
   @IsOptional()
-  image?: string;
+  images?: string[] = [];
 }

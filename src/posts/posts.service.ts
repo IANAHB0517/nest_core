@@ -18,6 +18,9 @@ import {
 import { POST_IMAGE_PATH, TEMP_FOLDER_PATH } from 'src/common/const/path.const';
 import { promises } from 'fs';
 import { basename, join } from 'path';
+import { CreatePostImageDto } from './image/dto/create-image.dto';
+import { ImageModel } from 'src/common/entity/image.entity';
+import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const';
 
 /** author : string;
  * title : string;
@@ -67,6 +70,8 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
+    @InjectRepository(ImageModel)
+    private readonly imagerepository: Repository<ImageModel>,
     private readonly commonService: CommonService,
     private readonly configService: ConfigService,
   ) {}
@@ -74,7 +79,9 @@ export class PostsService {
   async getAllPosts() {
     return await this.postsRepository.find({
       // author 이라는 값을 통해 가지고오기 때문에 중복된 값을 가져오지 않고 한번 가지고 온 값을 재활용하여 출력해주기 때문에 메모리와 속도를 절약할 수 있다.
-      relations: ['author'],
+
+      // 환경변수로 설정된 relation을 불러오는 값
+      ...DEFAULT_POST_FIND_OPTIONS,
     });
   }
 
@@ -85,9 +92,9 @@ export class PostsService {
       this.postsRepository,
       {
         /**
-         * join 되어 가지고 와야 하는 값이나 필터링 되어야 하는 값을 넣어준다
+         *  환경변수로 설정된 relation을 불러오는 값
          *  */
-        relations: ['author'],
+        ...DEFAULT_POST_FIND_OPTIONS,
       },
       'posts',
     );
@@ -205,16 +212,17 @@ export class PostsService {
       await this.createPost(userId, {
         title: `임의로 생성된 포스트 제목 ${i}`,
         content: `임의로 생성된 포스트 컨텐츠 ${i}`,
+        images: [],
       });
     }
   }
 
   async getPostById(id: number) {
     const post = await this.postsRepository.findOne({
+      ...DEFAULT_POST_FIND_OPTIONS,
       where: {
         id,
       },
-      relations: ['author'],
     });
 
     if (!post) {
@@ -233,6 +241,7 @@ export class PostsService {
         id: authorId,
       },
       ...postDto,
+      images: [],
       likeCount: 0,
       commentCount: 0,
     });
@@ -242,10 +251,10 @@ export class PostsService {
     return newPost;
   }
 
-  async createPostImage(dto: CreatePostDto) {
+  async createPostImage(dto: CreatePostImageDto) {
     // dto의 이미지 이름을 기반으로
     // 파일의 경로를 생성한다
-    const tempFilePath = join(TEMP_FOLDER_PATH, dto.image);
+    const tempFilePath = join(TEMP_FOLDER_PATH, dto.path);
 
     try {
       // 파일이 존재하는지 확인
@@ -263,11 +272,16 @@ export class PostsService {
     // {프로젝트경로}/public/posts/asdf.jpg
     const newPath = join(POST_IMAGE_PATH, fileName);
 
+    // save
+    const result = await this.imagerepository.save({
+      ...dto,
+    });
+
     // 첫번째 경로에서 두변째 경로로 해당 파일을 이동시킨다.
     // Linux의 mv 명령어와 같은 방법으로 사용
     await promises.rename(tempFilePath, newPath);
 
-    return true;
+    return result;
   }
 
   async updatePost(postId: number, postDto: UpdatePostDto) {
@@ -275,7 +289,9 @@ export class PostsService {
     // save의 기능
     // 1) 만약에 데이터가 존재하지 않는다면 (id기준으로) 새로 생성한다.
     // 2) 만약에 데이터가 존재한다면 (같은 id의 값이 존재한다면) 존재하던 값을 업데이트한다.
-    const post = await this.postsRepository.findOne({ where: { id: postId } });
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+    });
 
     if (!post) {
       throw new NotFoundException();

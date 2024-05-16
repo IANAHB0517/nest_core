@@ -5,9 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostsModel } from './entities/posts.entity';
 import { AuthModule } from '../auth/auth.module';
 import { CommonModule } from 'src/common/common.module';
+import { ImageModel } from 'src/common/entity/image.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PostsModel]), AuthModule, CommonModule],
+  imports: [
+    TypeOrmModule.forFeature([PostsModel, ImageModel]),
+    AuthModule,
+    CommonModule,
+  ],
 
   controllers: [PostsController],
   providers: [PostsService],

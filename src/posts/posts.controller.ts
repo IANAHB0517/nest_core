@@ -16,6 +16,7 @@ import { User } from 'src/users/decorator/user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
+import { ImageModelType } from 'src/common/entity/image.entity';
 
 @Controller('posts')
 export class PostsController {
@@ -39,6 +40,25 @@ export class PostsController {
   // 3) POST /posts
   //    post를 생성한다.
   // Data Transfer Object
+
+  /**
+   * A Model, B Model
+   *
+   * Post API -> A 모델을 저장하고, B 모델을 저장한다.
+   * await repository.save(a);
+   * await repository.save(b);
+   *
+   * 만약에 a를 저장하다가 실패하면 b를 저장하면 안될 경우
+   *
+   * All or Nothing
+   *
+   * transaction
+   * start -> 시작
+   * commit -> 저장
+   *
+   * rollback -> 원상복구
+   * */
+
   @Post()
   @UseGuards(AccessTokenGuard)
   // FileInterceptor를 사용하면 posts.module에서 등록해 놓은 multerModule의 단계를 전부 거친 파일만 받을 수 있다.
@@ -48,9 +68,18 @@ export class PostsController {
     @Body() body: CreatePostDto,
     // @UploadedFile() file?: Express.Multer.File,
   ) {
-    await this.postsService.createPostImage(body);
+    const post = await this.postsService.createPost(userId, body);
 
-    return this.postsService.createPost(userId, body);
+    for (let i = 0; i < body.images.length; i++) {
+      await this.postsService.createPostImage({
+        post,
+        order: i,
+        path: body.images[i],
+        type: ImageModelType.POST_IMAGE,
+      });
+    }
+
+    return this.postsService.getPostById(post.id);
   }
 
   // 4) put /posts/:id
