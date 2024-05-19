@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, tap, observable, map } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable()
 export class LogInterceptor implements NestInterceptor {
@@ -51,6 +51,7 @@ export class LogInterceptor implements NestInterceptor {
         .pipe(
           tap(
             // [RES] {요청 path} {응답 시간} {소요 시간 ms}
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             (observable) =>
               console.log(
                 `[RES] ${path} ${new Date().toLocaleString('kr')} ${new Date().getMilliseconds() - now.getMilliseconds()} ms`,
