@@ -28,7 +28,7 @@ export class TransactionInterceptor implements NestInterceptor {
     // 이 시점부터 같은 쿼리러너를 사용하면 트랙잭션 안에서 데이터베이스 액션을 실행할 수 있다.
     await qr.startTransaction();
 
-    req.QueryRunner = qr;
+    req.queryRunner = qr;
 
     return next.handle().pipe(
       catchError(async (e) => {

@@ -86,8 +86,6 @@ export class PostsController {
     // 로직 실행
     const post = await this.postsService.createPost(userId, body, qr);
 
-    // throw new InternalServerErrorException('test Error');
-
     for (let i = 0; i < body.images.length; i++) {
       await this.postsImagesService.createPostImage(
         {
