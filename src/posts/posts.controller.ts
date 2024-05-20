@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  InternalServerErrorException,
   Param,
   ParseIntPipe,
   Patch,
@@ -37,7 +36,10 @@ export class PostsController {
   //    모든 posts를 다 가지고온다
   @Get()
   @UseInterceptors(LogInterceptor)
+  // @UseFilters(HttpExceptionFilter)
   getPosts(@Query() query: PaginatePostDto) {
+    // throw new BadRequestException('에러테스트');
+
     return this.postsService.paginatePosts(query);
   }
   // 2) GET /posts/:id

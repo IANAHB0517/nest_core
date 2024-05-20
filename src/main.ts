@@ -19,6 +19,9 @@ async function bootstrap() {
     }),
   );
 
+  // 앱 전체에서 전역으로 사용하고자 할 때 아래와 같이 선언함으로써 원하는 메소드에 어노테이션을 해서 사용할 수 있다.
+  // app.useGlobalFilters(new HttpExceptionFilter());
+
   await app.listen(3000);
 }
 bootstrap();
