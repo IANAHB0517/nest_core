@@ -45,6 +45,6 @@ export class ChatsGateway implements OnGatewayConnection {
   ) {
     this.server
       .in(message.chatId.toString())
-      .emit('receive_message', 'message from server');
+      .emit('receive_message', message.message);
   }
 }
