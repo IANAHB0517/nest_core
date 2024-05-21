@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { RolesEnum } from '../const/roels.const';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 import { BaseModel } from 'src/common/entity/base.entity';
@@ -7,6 +7,7 @@ import { lengthValidationMessage } from 'src/common/validation-message/length-va
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.messge';
 import { Exclude } from 'class-transformer';
+import { ChatsModel } from 'src/chats/entity/chats.entity';
 
 /**
  *
@@ -65,4 +66,10 @@ export class UsersModel extends BaseModel {
 
   @OneToMany(() => PostsModel, (posts) => posts.author)
   posts: PostsModel[];
+
+  @ManyToMany(() => ChatsModel, (chat) => chat.users)
+  // n : n 관계의 경우 각각의 테이블과 중간 테이블까지 세개의 테이블을 사용하여 데이터를 연동해준다
+  // 그 과정을 위해 한쪽에는 JoinTable 어노테이션이 필요하다.
+  @JoinTable()
+  chats: ChatsModel[];
 }
