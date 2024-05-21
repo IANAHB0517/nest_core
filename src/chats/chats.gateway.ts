@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   SubscribeMessage,
@@ -21,12 +22,29 @@ export class ChatsGateway implements OnGatewayConnection {
     console.log(`on connet called : ${socket.id}`);
     // throw new Error('Method not implemented.');
   }
+  @SubscribeMessage('enter_chat')
+  enterChat(
+    // 방의 chat ID들을 리스트로 받는다.
+    @MessageBody() data: number[],
+    // nestJS에서 생성된 소켓을 주입해준다. /// 어떤 소캣을 주입해주는가??????
+    @ConnectedSocket() socket: Socket,
+  ) {
+    for (const chatId of data) {
+      //socket.join()
+      socket.join(chatId.toString());
+    }
+  }
 
   // socket.on('send_message, (message) => {console.log(message)}); --> 어노테이션을 사용해 구현하면 아래와 같다
   // 이벤트를 리스닝 한다는 어노테이션([리스닝할 이벤트])
   @SubscribeMessage('send_message')
   // 메소드의 이름 ([매개변수명:받으려는 데이터의 형식])
-  sendMessage(@MessageBody() message: string) {
-    this.server.emit('receive_message', 'where are you client');
+  sendMessage(
+    @MessageBody() message: { message: string; chatId: number },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    this.server
+      .in(message.chatId.toString())
+      .emit('receive_message', 'message from server');
   }
 }
