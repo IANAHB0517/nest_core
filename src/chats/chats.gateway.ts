@@ -45,6 +45,8 @@ export class ChatsGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     const chat = await this.chatsService.createChat(data);
+
+    // setting postman
   }
 
   // socket.on('send_message, (message) => {console.log(message)}); --> 어노테이션을 사용해 구현하면 아래와 같다
