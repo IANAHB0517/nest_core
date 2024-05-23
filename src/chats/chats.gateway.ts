@@ -5,10 +5,12 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { ChatsService } from '../../dist/chats/chats.service';
+import { EnterChatDto } from './dto/enter.chat.dto';
+import { ChatsService } from './chats.service';
 
 // 웹소켓 어노테이션을 붙여주면 게이트 namespace 옵션을 사용해 웨이로서의 라우팅을 지정해줄 수 있다
 @WebSocketGateway({
@@ -27,16 +29,25 @@ export class ChatsGateway implements OnGatewayConnection {
     // throw new Error('Method not implemented.');
   }
   @SubscribeMessage('enter_chat')
-  enterChat(
+  async enterChat(
     // 방의 chat ID들을 리스트로 받는다.
-    @MessageBody() data: number[],
+    @MessageBody() data: EnterChatDto,
     // nestJS에서 생성된 소켓을 주입해준다. /// 어떤 소캣을 주입해주는가??????
     @ConnectedSocket() socket: Socket,
   ) {
-    for (const chatId of data) {
-      //socket.join()
-      socket.join(chatId.toString());
+    for (const chatId of data.chatIds) {
+      const exists = await this.chatsService.checkIfChatExists(chatId);
+
+      if (!exists) {
+        throw new WsException({
+          code: 100,
+          message: `존재하지 않는 chat 입니다. chatId :  ${chatId}`,
+        });
+      }
     }
+
+    // 기존에는 loop을 돌리는 형식이었지만 map 함수를 사용하면 굳이 loop을 돌릴 필요가 없다.
+    socket.join(data.chatIds.map((x) => x.toString()));
   }
   // RestAPI로 채팅방을 만드는 것이 더 효율적이고 시멘틱하다
   @SubscribeMessage('create_chat')
@@ -45,8 +56,6 @@ export class ChatsGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     const chat = await this.chatsService.createChat(data);
-
-    // setting postman
   }
 
   // socket.on('send_message, (message) => {console.log(message)}); --> 어노테이션을 사용해 구현하면 아래와 같다
