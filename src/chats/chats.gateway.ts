@@ -11,6 +11,8 @@ import { Server, Socket } from 'socket.io';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { EnterChatDto } from './dto/enter.chat.dto';
 import { ChatsService } from './chats.service';
+import { CreateMessagesDto } from './messages/dto/create-message.dto';
+import { ChatsMessagesService } from './messages/messages.service';
 
 // 웹소켓 어노테이션을 붙여주면 게이트 namespace 옵션을 사용해 웨이로서의 라우팅을 지정해줄 수 있다
 @WebSocketGateway({
@@ -18,7 +20,10 @@ import { ChatsService } from './chats.service';
   namespace: 'chats',
 })
 export class ChatsGateway implements OnGatewayConnection {
-  constructor(private readonly chatsService: ChatsService) {}
+  constructor(
+    private readonly chatsService: ChatsService,
+    private readonly messageService: ChatsMessagesService,
+  ) {}
 
   // nestJS frame work가 넣어주는 생성된 웹소켓 서버 이때의 Server는 socketIO의 서버를 가지고 와야한다
   @WebSocketServer()
@@ -62,15 +67,22 @@ export class ChatsGateway implements OnGatewayConnection {
   // 이벤트를 리스닝 한다는 어노테이션([리스닝할 이벤트])
   @SubscribeMessage('send_message')
   // 메소드의 이름 ([매개변수명:받으려는 데이터의 형식])
-  sendMessage(
-    @MessageBody() message: { message: string; chatId: number },
+  async sendMessage(
+    @MessageBody() dto: CreateMessagesDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    // this.server
-    //   .in(message.chatId.toString())
-    //   .emit('receive_message', message.message);
+    const chatExists = await this.chatsService.checkIfChatExists(dto.chatId);
+
+    if (!chatExists) {
+      throw new WsException(
+        `존재하지 않는 채팅방 입니다. Chat ID : ${dto.chatId}`,
+      );
+    }
+
+    const message = await this.messageService.createMessage(dto);
+
     socket
-      .to(message.chatId.toString())
+      .to(message.chat.id.toString())
       .emit('receive_message', message.message);
   }
 }

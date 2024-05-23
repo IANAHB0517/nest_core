@@ -29,6 +29,7 @@ import { ImageModel } from './common/entity/image.entity';
 import { LogMiddleware } from './common/middleware/log.middleware';
 import { ChatsModule } from './chats/chats.module';
 import { ChatsModel } from './chats/entity/chats.entity';
+import { MessagesModel } from './chats/messages/entity/messages.entity';
 
 @Module({
   imports: [
@@ -56,7 +57,7 @@ import { ChatsModel } from './chats/entity/chats.entity';
       password: process.env[ENV_DB_PASSWORD_KEY],
       database: process.env[ENV_DB_DATABASE_KEY],
       // 사용할 모든 모델을 넣어준다.
-      entities: [PostsModel, UsersModel, ImageModel, ChatsModel],
+      entities: [PostsModel, UsersModel, ImageModel, ChatsModel, MessagesModel],
       synchronize: true,
     }),
     UsersModule,

@@ -8,6 +8,7 @@ import { stringValidationMessage } from 'src/common/validation-message/string-va
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.messge';
 import { Exclude } from 'class-transformer';
 import { ChatsModel } from 'src/chats/entity/chats.entity';
+import { MessagesModel } from 'src/chats/messages/entity/messages.entity';
 
 /**
  *
@@ -72,4 +73,7 @@ export class UsersModel extends BaseModel {
   // 그 과정을 위해 한쪽에는 JoinTable 어노테이션이 필요하다.
   @JoinTable()
   chats: ChatsModel[];
+
+  @OneToMany(() => MessagesModel, (message) => message.author)
+  messages: MessagesModel;
 }
