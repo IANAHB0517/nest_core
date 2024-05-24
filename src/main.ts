@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 글로벌 파이프의 경우 RestAPI의 Controller에만 적용이 된다
   app.useGlobalPipes(
     new ValidationPipe({
       // dto에 특정 값을 입력하지 않을시 선언되어있는 defualt 값들이 들어갈 수 있도록 허가해주는 코드

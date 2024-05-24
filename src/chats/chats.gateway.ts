@@ -13,6 +13,7 @@ import { EnterChatDto } from './dto/enter.chat.dto';
 import { ChatsService } from './chats.service';
 import { CreateMessagesDto } from './messages/dto/create-message.dto';
 import { ChatsMessagesService } from './messages/messages.service';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 
 // 웹소켓 어노테이션을 붙여주면 게이트 namespace 옵션을 사용해 웨이로서의 라우팅을 지정해줄 수 있다
 @WebSocketGateway({
@@ -33,6 +34,20 @@ export class ChatsGateway implements OnGatewayConnection {
     console.log(`on connet called : ${socket.id}`);
     // throw new Error('Method not implemented.');
   }
+  // socketIO 에서는 subscribe 별로 파이프를 별도 적용을 해주어야 한다!
+  @UsePipes(
+    new ValidationPipe({
+      // dto에 특정 값을 입력하지 않을시 선언되어있는 defualt 값들이 들어갈 수 있도록 허가해주는 코드
+      transform: true,
+      transformOptions: {
+        // 쿼리스트링으로 들어옵 값을 클래스 트렌스포머를 통해 어노테이션에 지정되어 있는 대로 임의로 변환 하는 것을 허용 하는 옵션
+        enableImplicitConversion: true,
+      },
+      // 쿼리를 통해 들어오는 key 값을 dto로 설정해놓은 값만 허용하도록 한다.
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
   @SubscribeMessage('enter_chat')
   async enterChat(
     // 방의 chat ID들을 리스트로 받는다.
