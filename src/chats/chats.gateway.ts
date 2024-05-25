@@ -101,6 +101,8 @@ export class ChatsGateway implements OnGatewayConnection {
     @MessageBody() data: CreateChatDto,
     @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
+    // 이거 언제 잡지??
+
     const chat = await this.chatsService.createChat(data);
   }
 
