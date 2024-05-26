@@ -14,14 +14,14 @@ export class ChatsMessagesService {
     private readonly commonService: CommonService,
   ) {}
 
-  async createMessage(dto: CreateMessagesDto) {
+  async createMessage(dto: CreateMessagesDto, authorId: number) {
     const message = await this.messagesRepository.save({
       // 1 : 1 의 관계일 경우는 이렇게 값을 넣어줄 수있다.
       chat: {
         id: dto.chatId,
       },
       author: {
-        id: dto.authorId,
+        id: authorId,
       },
       message: dto.message,
     });

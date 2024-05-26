@@ -57,6 +57,7 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
+  @UseGuards(SocketBearerTokenGuard)
   @SubscribeMessage('enter_chat')
   async enterChat(
     // 방의 chat ID들을 리스트로 받는다.
@@ -101,18 +102,31 @@ export class ChatsGateway implements OnGatewayConnection {
     @MessageBody() data: CreateChatDto,
     @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
-    // 이거 언제 잡지??
-
     const chat = await this.chatsService.createChat(data);
   }
 
+  @UsePipes(
+    new ValidationPipe({
+      // dto에 특정 값을 입력하지 않을시 선언되어있는 defualt 값들이 들어갈 수 있도록 허가해주는 코드
+      transform: true,
+      transformOptions: {
+        // 쿼리스트링으로 들어옵 값을 클래스 트렌스포머를 통해 어노테이션에 지정되어 있는 대로 임의로 변환 하는 것을 허용 하는 옵션
+        enableImplicitConversion: true,
+      },
+      // 쿼리를 통해 들어오는 key 값을 dto로 설정해놓은 값만 허용하도록 한다.
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  @UseFilters(SocketCatchHttpExceptionFilter)
+  @UseGuards(SocketBearerTokenGuard)
   // socket.on('send_message, (message) => {console.log(message)}); --> 어노테이션을 사용해 구현하면 아래와 같다
   // 이벤트를 리스닝 한다는 어노테이션([리스닝할 이벤트])
   @SubscribeMessage('send_message')
   // 메소드의 이름 ([매개변수명:받으려는 데이터의 형식])
   async sendMessage(
     @MessageBody() dto: CreateMessagesDto,
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
     const chatExists = await this.chatsService.checkIfChatExists(dto.chatId);
 
@@ -122,7 +136,10 @@ export class ChatsGateway implements OnGatewayConnection {
       );
     }
 
-    const message = await this.messageService.createMessage(dto);
+    const message = await this.messageService.createMessage(
+      dto,
+      socket.user.id,
+    );
 
     socket
       .to(message.chat.id.toString())
