@@ -2,6 +2,8 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -13,14 +15,8 @@ import { EnterChatDto } from './dto/enter.chat.dto';
 import { ChatsService } from './chats.service';
 import { CreateMessagesDto } from './messages/dto/create-message.dto';
 import { ChatsMessagesService } from './messages/messages.service';
-import {
-  UseFilters,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { SocketCatchHttpExceptionFilter } from 'src/common/exception-filter/socket-catch-http.exception';
-import { SocketBearerTokenGuard } from 'src/auth/guard/socket/socker-bearer-token.guard';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from 'src/auth/auth.service';
@@ -30,13 +26,24 @@ import { AuthService } from 'src/auth/auth.service';
   // ws://localhost:3000/chats
   namespace: 'chats',
 })
-export class ChatsGateway implements OnGatewayConnection {
+export class ChatsGateway
+  implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
+{
   constructor(
     private readonly chatsService: ChatsService,
     private readonly messageService: ChatsMessagesService,
     private readonly userService: UsersService,
     private readonly authService: AuthService,
   ) {}
+
+  handleDisconnect(socket: Socket) {
+    console.log(`on disconnect call by : ${socket.id}`);
+  }
+
+  // 여기서 받는 server는 WebSocketServer 에서 받는 서버와 동일한 서버이다.
+  afterInit(server: any) {
+    console.log(`after gateway init`);
+  }
 
   // nestJS frame work가 넣어주는 생성된 웹소켓 서버 이때의 Server는 socketIO의 서버를 가지고 와야한다
   @WebSocketServer()
