@@ -17,7 +17,7 @@ import { CreateMessagesDto } from './messages/dto/create-message.dto';
 import { ChatsMessagesService } from './messages/messages.service';
 import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { SocketCatchHttpExceptionFilter } from 'src/common/exception-filter/socket-catch-http.exception';
-import { UsersModel } from 'src/users/entities/users.entity';
+import { UsersModel } from 'src/users/entity/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from 'src/auth/auth.service';
 
@@ -42,7 +42,7 @@ export class ChatsGateway
 
   // 여기서 받는 server는 WebSocketServer 에서 받는 서버와 동일한 서버이다.
   afterInit(server: any) {
-    console.log(`after gateway init`);
+    console.log(`${server.id} gateway init`);
   }
 
   // nestJS frame work가 넣어주는 생성된 웹소켓 서버 이때의 Server는 socketIO의 서버를 가지고 와야한다
@@ -139,6 +139,9 @@ export class ChatsGateway
     @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
     const chat = await this.chatsService.createChat(data);
+    console.log(
+      `${socket.id}의 ${socket.user.id} 가 chatroom 생성을 완료했습니다. ${chat}`,
+    );
   }
 
   @UsePipes(
