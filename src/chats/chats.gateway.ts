@@ -22,6 +22,8 @@ import {
 import { SocketCatchHttpExceptionFilter } from 'src/common/exception-filter/socket-catch-http.exception';
 import { SocketBearerTokenGuard } from 'src/auth/guard/socket/socker-bearer-token.guard';
 import { UsersModel } from 'src/users/entities/users.entity';
+import { UsersService } from 'src/users/users.service';
+import { AuthService } from 'src/auth/auth.service';
 
 // 웹소켓 어노테이션을 붙여주면 게이트 namespace 옵션을 사용해 웨이로서의 라우팅을 지정해줄 수 있다
 @WebSocketGateway({
@@ -32,16 +34,45 @@ export class ChatsGateway implements OnGatewayConnection {
   constructor(
     private readonly chatsService: ChatsService,
     private readonly messageService: ChatsMessagesService,
+    private readonly userService: UsersService,
+    private readonly authService: AuthService,
   ) {}
 
   // nestJS frame work가 넣어주는 생성된 웹소켓 서버 이때의 Server는 socketIO의 서버를 가지고 와야한다
   @WebSocketServer()
   server: Server;
 
-  handleConnection(socket: Socket) {
-    console.log(`on connet called : ${socket.id}`);
-    // throw new Error('Method not implemented.');
+  // 연결을 관리해주는 함수에서 소켓에 유저를 넣어줄 경우 최초연결실에 입력된 유저의 데이터가 지속되며 해당 로직을 통해 타 메서드에서 토큰 가드를 사용하지 않아도 된다.
+  // 1. 연결된 유저정보가 유지된다.
+  // 2. 소캣에서 유저정보를 학보하고 있기 때문에 유저 정보를 신뢰할 수 있다.
+  // 3. 이를 통해 매번의 요청마다 토큰을 확인할 필요가 없어진다.
+  // 4. socket을 통해 존속되어야 하는 정보가 있다면 유저정보를 전달하는 방법으로 계속해서 전달할 수 있다.
+  async handleConnection(socket: Socket & { user: UsersModel }) {
+    const headers = socket.handshake.headers;
+
+    // Bearer xxxx.xxx.x
+    const rawToken = headers['authorization'];
+
+    if (!rawToken) {
+      socket.disconnect();
+    }
+    try {
+      const token = this.authService.extractTokenFromHeader(rawToken, true);
+
+      const payload = this.authService.verifyToken(token);
+      const user = await this.userService.getUserByEmail(payload.email);
+
+      // 소캣에 특정 갑을 넣어줄 때는 아래와 같이 단순히 socket.property로 한다.
+      socket.user = user;
+
+      return true;
+    } catch (e) {
+      // socket의 연결을 끊는다.
+      // socket을 끊으면서 에러메세지를 던질 수는 없는가??
+      socket.disconnect();
+    }
   }
+
   // socketIO 에서는 subscribe 별로 파이프를 별도 적용을 해주어야 한다!
   @UsePipes(
     new ValidationPipe({
@@ -57,13 +88,12 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
   @SubscribeMessage('enter_chat')
   async enterChat(
     // 방의 chat ID들을 리스트로 받는다.
     @MessageBody() data: EnterChatDto,
     // nestJS에서 생성된 소켓을 주입해준다. /// 어떤 소캣을 주입해주는가??????
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
     for (const chatId of data.chatIds) {
       const exists = await this.chatsService.checkIfChatExists(chatId);
@@ -95,7 +125,6 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
   // RestAPI로 채팅방을 만드는 것이 더 효율적이고 시멘틱하다
   @SubscribeMessage('create_chat')
   async createChat(
@@ -119,7 +148,6 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
   // socket.on('send_message, (message) => {console.log(message)}); --> 어노테이션을 사용해 구현하면 아래와 같다
   // 이벤트를 리스닝 한다는 어노테이션([리스닝할 이벤트])
   @SubscribeMessage('send_message')
