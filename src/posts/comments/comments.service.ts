@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { CommentsModel } from './entity/comments.entity';
 import { CommonService } from '../../common/common.service';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UsersModel } from 'src/users/entity/users.entity';
+import { DEFAULT_COMMENT_FIND_OPTIONS } from './const/default-comments.find-options.const';
 
 @Injectable()
 export class CommentsService {
@@ -33,25 +35,34 @@ export class CommentsService {
   }
 
   async createComment(
-    authorId: number,
+    author: UsersModel,
     postId: number,
     commentDto: CreateCommentDto,
   ) {
-    const comment = this.commentRepository.create({
-      author: {
-        id: authorId,
-      },
+    return this.commentRepository.save({
+      author,
       post: {
         id: postId,
       },
       ...commentDto,
     });
 
-    return this.commentRepository.save(comment);
+    // 다른 로직을 처리하려는게 아니라면 아래의 과정 없이 바로 세이브하는 것이 더 빠르다
+    // const comment = this.commentRepository.create({
+    //   author,
+    //   post: {
+    //     id: postId,
+    //   },
+    //   ...commentDto,
+    // });
   }
+
+  // return this.commentRepository.save(comment);
+
   async getComment(commentId: number) {
     const comment = await this.commentRepository.findOne({
       where: { id: commentId },
+      ...DEFAULT_COMMENT_FIND_OPTIONS,
     });
 
     if (!comment) {
@@ -63,28 +74,27 @@ export class CommentsService {
 
   async updateComment(
     commentId: number,
-    authorId: number,
+    user: UsersModel,
     dto: UpdateCommentDto,
   ) {
-    console.log('check1');
+    const prevComment = await this.commentRepository.preload({
+      id: commentId,
+      ...dto,
+    });
 
-    const comment = await this.checkAuthor(authorId, commentId);
-
-    if (!comment) {
-      throw new NotFoundException(`존재하지 않는 댓글입니다.`);
-    }
-
-    console.log(comment);
-
-    if (dto.comment) {
-      comment.comment = dto.comment;
-    }
-
-    console.log(comment);
-
-    const newComment = await this.commentRepository.save(comment);
+    const newComment = await this.commentRepository.save(prevComment);
 
     return newComment;
+
+    // const comment = await this.checkAuthor(user.id, commentId);
+    // if (!comment) {
+    //   throw new NotFoundException(`존재하지 않는 댓글입니다.`);
+    // }
+    // if (dto.comment) {
+    //   comment.comment = dto.comment;
+    // }
+    // const newComment = await this.commentRepository.save(comment);
+    // return newComment;
   }
 
   paginateComment(dto: PaginateCommentsDto, postId: number) {
@@ -92,9 +102,8 @@ export class CommentsService {
       dto,
       this.commentRepository,
       {
-        relations: {
-          author: true,
-        },
+        where: { post: { id: postId } },
+        ...DEFAULT_COMMENT_FIND_OPTIONS,
       },
       `posts/${postId}/comments`,
     );

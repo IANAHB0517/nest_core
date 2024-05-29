@@ -32,6 +32,6 @@ export class PostsModel extends BaseModel {
   @OneToMany((type) => ImageModel, (image) => image.post)
   images: ImageModel[];
 
-  @OneToMany(() => CommentsModel, (comment) => comment.id)
+  @OneToMany(() => CommentsModel, (comment) => comment.post)
   comments: CommentsModel[];
 }

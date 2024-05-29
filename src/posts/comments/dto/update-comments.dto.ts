@@ -1,9 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CommentsModel } from '../entity/comments.entity';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { UsersModel } from 'src/users/entity/users.entity';
+import { CreateCommentDto } from './create-comment.dto';
 
-export class UpdateCommentDto extends PartialType(CommentsModel) {
+export class UpdateCommentDto extends PartialType(CreateCommentDto) {
   @IsString()
   @IsOptional()
   comment: string;

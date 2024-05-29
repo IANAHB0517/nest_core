@@ -86,5 +86,5 @@ export class UsersModel extends BaseModel {
 
   // Comments Author
   @OneToMany(() => CommentsModel, (comment) => comment.author)
-  comments: CommentsModel;
+  postComments: CommentsModel[];
 }
