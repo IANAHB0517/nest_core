@@ -23,6 +23,8 @@ import { PostsImagesService } from './image/images.service';
 import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import { RolesEnum } from 'src/users/const/roels.const';
+import { Roles } from 'src/users/decorator/roles.decoretor';
 
 @Controller('posts')
 export class PostsController {
@@ -117,7 +119,10 @@ export class PostsController {
 
   // 5) DELETE /posts/:id
   //    id에 해당되는 POST를 삭제한다.
+
   @Delete(':id')
+  @UseGuards(AccessTokenGuard) // 토큰 가드를 활용하여 헤더에 사용자 정보를 넣어주구 이후 RolesEnum을 활용하여 권한을 확인하도록 한다.
+  @Roles(RolesEnum.ADMIN)
   deletePost(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.deletePost(+id);
   }
@@ -130,3 +135,4 @@ export class PostsController {
     return true;
   }
 }
+// RBAC - Role Based Access Control
