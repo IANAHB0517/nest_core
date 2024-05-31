@@ -79,7 +79,6 @@ export class PostsController {
    * */
 
   @Post()
-  @UseGuards(AccessTokenGuard)
   // transaction은 인터셉터에게 맡기고 컨트롤러에서는 로직의 흐름에 따라 서비스 메소드의 호출만을 신경 쓸수 있는 구조로 만들어준다.
   @UseInterceptors(TransactionInterceptor)
   // FileInterceptor를 사용하면 posts.module에서 등록해 놓은 multerModule의 단계를 전부 거친 파일만 받을 수 있다.
@@ -131,7 +130,6 @@ export class PostsController {
   }
 
   @Post('random')
-  @UseGuards(AccessTokenGuard)
   async postPostRandom(@User('id') userId: number) {
     await this.postsService.generatePosts(userId);
 

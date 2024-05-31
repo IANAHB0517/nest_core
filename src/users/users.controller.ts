@@ -1,5 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { Roles } from './decorator/roles.decoretor';
+import { RolesEnum } from './const/roels.const';
 
 @Controller('users')
 export class UsersController {
@@ -13,6 +15,7 @@ export class UsersController {
    *
    * deserialization -> 역직렬화
    */
+  @Roles(RolesEnum.ADMIN)
   getUsers() {
     return this.usersService.getAllUsers();
   }
