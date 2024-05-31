@@ -1,5 +1,5 @@
 export enum RolesEnum {
-  // 관리자 or 사용지
-  'USER' = 'user',
-  'ADMIN' = 'admin',
+  // 관리자 or 사용자
+  'USER' = 'USER',
+  'ADMIN' = 'ADMIN',
 }

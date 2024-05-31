@@ -33,6 +33,7 @@ import { MessagesModel } from './chats/messages/entity/messages.entity';
 import { CommentsModule } from './posts/comments/comments.module';
 import { CommentsModel } from './posts/comments/entity/comments.entity';
 import { RolesGuard } from './users/guard/roles.guard';
+import { AccessTokenGuard } from './auth/guard/bearer-token.guard';
 
 @Module({
   imports: [
@@ -83,6 +84,11 @@ import { RolesGuard } from './users/guard/roles.guard';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
+    // app_module에 액세스토큰 가드를 넣어줌으로 인해서 모든 요청이 accessTokenGuard가 적용되어 버린다.
+    // 모든 API가 token을 필요로 하게 된다.
+    // 이 방법이 더 일반적인 설계다.
+    // 이에 대한 대처로 특정 API에 PUblicAPI라는 토큰을 달아준다.
+    { provide: APP_GUARD, useClass: AccessTokenGuard },
     // 가드는 배치의 순서가 중요하다 어떤 가드를 언제 실행하는지 잘 확인하자
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

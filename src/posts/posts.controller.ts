@@ -25,6 +25,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { RolesEnum } from 'src/users/const/roels.const';
 import { Roles } from 'src/users/decorator/roles.decoretor';
+import { IsPublic } from 'src/common/decorator/is-public.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -38,7 +39,8 @@ export class PostsController {
   //    모든 posts를 다 가지고온다
   @Get()
   @UseInterceptors(LogInterceptor)
-  // @UseFilters(HttpExceptionFilter)
+  // IsPublic 어노테이션을 이용해서 특정 API를 로그인 없이 사용할 수 있도록 해준다.
+  @IsPublic()
   getPosts(@Query() query: PaginatePostDto) {
     // throw new BadRequestException('에러테스트');
 
@@ -49,6 +51,7 @@ export class PostsController {
   //    예를 들어 id=1일 경우 id가 1인 포스트를 가져온다.
 
   @Get(':id')
+  @IsPublic()
   getPost(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.getPostById(id);
   }
